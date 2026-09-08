@@ -1,164 +1,208 @@
-# SQL Data Warehouse Project (MySQL)
+# SQL Data Warehouse Project — MySQL
+
+> A portfolio-grade SQL data warehouse built with **MySQL 8.0+**, using a **Bronze → Silver → Gold (Medallion)** architecture to transform raw CRM and ERP data into a reporting-ready **Star Schema**.
 
 ## 📌 Project Overview
 
-This project demonstrates the design and implementation of a modern **SQL Data Warehouse** using **MySQL** and the **Medallion Architecture** (Bronze, Silver, and Gold layers).
+This project demonstrates an end-to-end data warehousing workflow:
 
-The project implements a complete ETL pipeline that extracts raw CRM and ERP data from CSV files, transforms and cleans the data, and builds analytical models for reporting and business intelligence.
+**CSV source data → Bronze (raw) → Silver (cleaned) → Gold (business-ready) → BI / analytics**
 
----
+The Gold layer exposes analytical views for **customers, products, and sales**, designed for reporting and BI tools such as Power BI.
 
-## 🏗️ Data Architecture
+## 🎯 Objectives
 
-The project follows the **Medallion Architecture**, consisting of three layers:
+- Design a layered SQL data warehouse using the Medallion Architecture.
+- Load and preserve raw source data in the Bronze layer.
+- Clean, standardize, validate, and integrate data in the Silver layer.
+- Build business-ready dimensional and fact views in the Gold layer.
+- Apply a Star Schema suitable for analytical reporting.
+- Add SQL-based data quality checks across the warehouse.
 
-### 🥉 Bronze Layer
-- Stores raw data loaded directly from source CSV files.
-- Preserves original source data.
-- No transformations are applied.
-
-### 🥈 Silver Layer
-- Cleans and transforms the Bronze data.
-- Removes duplicates.
-- Standardizes values.
-- Handles missing and invalid data.
-- Prepares data for analytics.
-
-### 🥇 Gold Layer
-- Contains business-ready analytical data.
-- Implements a Star Schema.
-- Provides dimension and fact tables for reporting.
-
----
-
-## 🎯 Project Objectives
-
-- Build a SQL Data Warehouse using MySQL.
-- Design a Medallion Architecture.
-- Develop ETL processes for loading and transforming data.
-- Perform data cleansing and validation.
-- Create analytical data models.
-- Support business intelligence and reporting.
-
----
-
-## 📊 Analytics & Reporting
-
-The Gold layer enables analysis of:
-
-- Customer Behavior
-- Product Performance
-- Sales Trends
-- Business KPIs
-
----
-
-## 🛠️ Technologies Used
-
-- MySQL 8.0+
-- SQL
-- MySQL Workbench
-- CSV Files
-
----
-
-## 📂 Project Structure
+## 🏗️ Architecture
 
 ```text
-data-warehouse-project/
+                         ┌─────────────────────┐
+                         │   CRM / ERP CSVs    │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   🥉 Bronze Layer   │
+                         │     Raw / Source    │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   🥈 Silver Layer   │
+                         │ Cleaned / Integrated│
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │    🥇 Gold Layer    │
+                         │  Star Schema Views  │
+                         └──────────┬──────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+             BI / Dashboards                 SQL Analytics
+               (e.g. Power BI)                 & Reporting
+```
+
+### Bronze
+Raw data loaded with minimal transformation, preserving source values for traceability and reprocessing.
+
+### Silver
+Cleans and standardizes source data, handles duplicates and invalid values, and integrates CRM/ERP datasets into consistent analytical structures.
+
+### Gold
+Provides business-ready views organized as a Star Schema:
+
+- `gold.dim_customers`
+- `gold.dim_products`
+- `gold.fact_sales`
+
+The Gold dimension views use generated surrogate keys, while the sales fact view connects transactional records to customer and product dimensions.
+
+## 📊 Analytical Model
+
+| Object | Type | Purpose |
+|---|---|---|
+| `dim_customers` | Dimension | Customer attributes such as name, country, gender, marital status, and birthdate |
+| `dim_products` | Dimension | Product, category, subcategory, cost, product line, and start-date attributes |
+| `fact_sales` | Fact | Orders, dates, customers, products, sales amount, quantity, and price |
+
+## ✅ Data Quality
+
+Validation scripts cover areas such as:
+
+- Duplicate key detection
+- NULL checks
+- Data consistency
+- Invalid date checks
+- Standardization checks
+- Referential integrity between fact and dimension data
+
+## 🛠️ Tech Stack
+
+- **MySQL 8.0+**
+- **SQL**
+- **MySQL Workbench**
+- **CSV**
+- **Power BI** (for downstream reporting)
+
+## 📂 Repository Structure
+
+```text
+sql-data-warehouse-project/
 │
 ├── datasets/
 │   ├── source_crm/
+│   │   ├── cust_info.csv
+│   │   ├── prd_info.csv
+│   │   └── sales_details.csv
+│   │
 │   └── source_erp/
+│       ├── CUST_AZ12.csv
+│       ├── LOC_A101.csv
+│       └── PX_CAT_G1V2.csv
 │
 ├── scripts/
 │   ├── bronze/
 │   │   ├── ddl_bronze.sql
-│   │   └── load_bronze.sql
+│   │   └── proc_load_bronze.sql
 │   │
 │   ├── silver/
 │   │   ├── ddl_silver.sql
-│   │   ├── load_silver.sql
-│   │   └── quality_checks.sql
+│   │   └── proc_load_silver.sql
 │   │
 │   └── gold/
-│       ├── ddl_gold.sql
-│       ├── create_views.sql
-│       └── quality_checks.sql
+│       └── ddl_gold.sql
 │
-├── README.md
-└── .gitignore
+├── tests/
+│   ├── quality_check_silver.sql
+│   └── quality_check_gold.sql
+│
+├── LICENSE
+└── README.md
 ```
 
----
+## ▶️ How to Run
 
-## ⚙️ ETL Workflow
+### 1. Prerequisites
+
+Install **MySQL 8.0+** and a SQL client such as **MySQL Workbench**.
+
+### 2. Prepare databases
+
+Create the required databases/schemas used by the Bronze, Silver, and Gold scripts.
+
+### 3. Run Bronze
+
+Execute:
 
 ```text
-CSV Files
-    │
-    ▼
-Bronze Layer
-(Raw Data)
-    │
-    ▼
-Silver Layer
-(Cleaned & Transformed Data)
-    │
-    ▼
-Gold Layer
-(Analytical Models)
+scripts/bronze/ddl_bronze.sql
+scripts/bronze/proc_load_bronze.sql
 ```
 
----
+This creates the raw layer and loads the source CSV data.
 
-## ✅ Data Quality Checks
+### 4. Run Silver
 
-Quality validation is performed throughout the project, including:
+Execute:
 
-- Duplicate primary keys
-- NULL value checks
-- Data consistency validation
-- Invalid date detection
-- Data standardization
-- Referential integrity between fact and dimension tables
+```text
+scripts/silver/ddl_silver.sql
+scripts/silver/proc_load_silver.sql
+```
 
----
+This creates the cleaned and transformed layer.
 
-## ⭐ Gold Layer Data Model
+### 5. Run Gold
 
-### Dimension Tables
-- `dim_customers`
-- `dim_products`
+Execute:
 
-### Fact Table
-- `fact_sales`
+```text
+scripts/gold/ddl_gold.sql
+```
 
----
+This creates the analytical Gold views and Star Schema model.
 
-## 🚀 How to Run
+### 6. Validate the warehouse
 
-1. Create the databases:
-   - `bronze`
-   - `silver`
-   - `gold`
+Run the SQL checks in:
 
-2. Execute the Bronze scripts:
-   - Create Bronze tables
-   - Load raw CSV data
+```text
+tests/quality_check_silver.sql
+tests/quality_check_gold.sql
+```
 
-3. Execute the Silver scripts:
-   - Create Silver tables
-   - Clean and transform the data
+## 🔍 What This Project Demonstrates
 
-4. Execute the Gold scripts:
-   - Create dimension tables
-   - Create fact tables and analytical views
+This project highlights practical data analyst / analytics engineering skills including:
 
-5. Run the quality check scripts to validate the data.
+- SQL data transformation
+- ETL pipeline design
+- Data cleansing and standardization
+- Dimensional modeling
+- Star Schema design
+- Surrogate key generation
+- Data quality validation
+- CRM + ERP data integration
+- BI-ready data preparation
 
----
+## 📈 Example Reporting Use Cases
+
+The Gold model can support analysis of:
+
+- Customer demographics and distribution
+- Product and category performance
+- Sales volume and revenue
+- Order trends over time
+- Customer-to-product purchasing relationships
 
 ## 📄 License
 
-This project is intended for educational and portfolio purposes.
+This project is intended for educational and portfolio purposes and is distributed under the included license.
