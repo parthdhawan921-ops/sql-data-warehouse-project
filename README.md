@@ -22,32 +22,19 @@ The Gold layer exposes analytical views for **customers, products, and sales**, 
 ## 🏗️ Architecture
 
 ```text
-                         ┌─────────────────────┐
-                         │   CRM / ERP CSVs    │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   🥉 Bronze Layer   │
-                         │     Raw / Source    │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   🥈 Silver Layer   │
-                         │ Cleaned / Integrated│
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │    🥇 Gold Layer    │
-                         │  Star Schema Views  │
-                         └──────────┬──────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    ▼                               ▼
-             BI / Dashboards                 SQL Analytics
-               (e.g. Power BI)                 & Reporting
+CRM / ERP CSVs
+      │
+      ▼
+🥉 Bronze — Raw source data
+      │
+      ▼
+🥈 Silver — Cleaned & standardized data
+      │
+      ▼
+🥇 Gold — Business-ready analytical views
+      │
+      ├──────────────► BI / Dashboards
+      └──────────────► SQL Analytics
 ```
 
 ### Bronze
@@ -73,9 +60,22 @@ The Gold dimension views use generated surrogate keys, while the sales fact view
 | `dim_products` | Dimension | Product, category, subcategory, cost, product line, and start-date attributes |
 | `fact_sales` | Fact | Orders, dates, customers, products, sales amount, quantity, and price |
 
+## 📚 Documentation
+
+Detailed project documentation is available in the [`docs/`](docs/) directory:
+
+- [`data_layers.md`](docs/data_layers.md) — Bronze, Silver, and Gold responsibilities and workflow
+- [`data_warehouse_architecture.md`](docs/data_warehouse_architecture.md) — warehouse architecture and layer design
+- [`data_flow.md`](docs/data_flow.md) — source-to-Gold data lineage
+- [`data_model.md`](docs/data_model.md) — CRM/ERP integration and table relationships
+- [`data_catalog.md`](docs/data_catalog.md) — analytical objects and business definitions
+- [`sales_star_schema.md`](docs/sales_star_schema.md) — Gold sales Star Schema and relationships
+
+> The original visual architecture and data-model diagrams can also be kept in this `docs/` area as PDF references.
+
 ## ✅ Data Quality
 
-Validation scripts cover areas such as:
+Validation scripts cover:
 
 - Duplicate key detection
 - NULL checks
@@ -90,7 +90,7 @@ Validation scripts cover areas such as:
 - **SQL**
 - **MySQL Workbench**
 - **CSV**
-- **Power BI** (for downstream reporting)
+- **Power BI** for downstream reporting
 
 ## 📂 Repository Structure
 
@@ -110,20 +110,11 @@ sql-data-warehouse-project/
 │
 ├── scripts/
 │   ├── bronze/
-│   │   ├── ddl_bronze.sql
-│   │   └── proc_load_bronze.sql
-│   │
 │   ├── silver/
-│   │   ├── ddl_silver.sql
-│   │   └── proc_load_silver.sql
-│   │
 │   └── gold/
-│       └── ddl_gold.sql
 │
 ├── tests/
-│   ├── quality_check_silver.sql
-│   └── quality_check_gold.sql
-│
+├── docs/
 ├── LICENSE
 └── README.md
 ```
@@ -134,33 +125,25 @@ sql-data-warehouse-project/
 
 Install **MySQL 8.0+** and a SQL client such as **MySQL Workbench**.
 
-### 2. Prepare databases
+### 2. Run Bronze
 
-Create the required databases/schemas used by the Bronze, Silver, and Gold scripts.
-
-### 3. Run Bronze
-
-Execute:
+Execute the Bronze DDL and loading procedure:
 
 ```text
 scripts/bronze/ddl_bronze.sql
 scripts/bronze/proc_load_bronze.sql
 ```
 
-This creates the raw layer and loads the source CSV data.
+### 3. Run Silver
 
-### 4. Run Silver
-
-Execute:
+Execute the Silver DDL and loading procedure:
 
 ```text
 scripts/silver/ddl_silver.sql
 scripts/silver/proc_load_silver.sql
 ```
 
-This creates the cleaned and transformed layer.
-
-### 5. Run Gold
+### 4. Run Gold
 
 Execute:
 
@@ -168,20 +151,16 @@ Execute:
 scripts/gold/ddl_gold.sql
 ```
 
-This creates the analytical Gold views and Star Schema model.
+### 5. Validate
 
-### 6. Validate the warehouse
-
-Run the SQL checks in:
+Run the checks in:
 
 ```text
 tests/quality_check_silver.sql
 tests/quality_check_gold.sql
 ```
 
-## 🔍 What This Project Demonstrates
-
-This project highlights practical data analyst / analytics engineering skills including:
+## 🔍 Skills Demonstrated
 
 - SQL data transformation
 - ETL pipeline design
@@ -193,9 +172,9 @@ This project highlights practical data analyst / analytics engineering skills in
 - CRM + ERP data integration
 - BI-ready data preparation
 
-## 📈 Example Reporting Use Cases
+## 📈 Reporting Use Cases
 
-The Gold model can support analysis of:
+The Gold model supports analysis of:
 
 - Customer demographics and distribution
 - Product and category performance
